@@ -2,7 +2,7 @@ package service
 
 import (
 	"awesomeProject"
-	"github.com/jmoiron/sqlx"
+	"awesomeProject/pkg/repository"
 )
 
 type MessagesS interface {
@@ -30,18 +30,18 @@ type ItemsS interface {
 	Delete(messageId, itemId int) error
 }
 
-type Repository struct {
-	MessagesTB
-	PaymentsTB
-	DeliveriesTB
-	ItemsTB
+type Service struct {
+	MessagesS
+	PaymentsS
+	DeliveriesS
+	ItemsS
 }
 
-func NewRepository(db *sqlx.DB) *Repository {
-	return &Repository{
-		MessagesTB:   NewMessagesPostgres(db),
-		PaymentsTB:   NewPaymentsPostgres(db),
-		DeliveriesTB: NewDeliveriesPostgres(db),
-		ItemsTB:      NewItemsPostgres(db),
+func NewService(repos *repository.Repository) *Service {
+	return &Service{
+		MessagesS:   NewMessageService(repos.MessagesTB),
+		PaymentsS:   NewPaymentsService(repos.PaymentsTB),
+		DeliveriesS: NewDeliveriesService(repos.DeliveriesTB),
+		ItemsS:      NewItemsService(repos.ItemsTB),
 	}
 }

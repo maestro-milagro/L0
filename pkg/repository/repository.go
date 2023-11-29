@@ -6,28 +6,23 @@ import (
 )
 
 type MessagesTB interface {
-	Create(message message.Message) (int, error)
+	Create(message message.Message, delId, payId, itemsId int) (int, error)
 	GetAll() ([]message.Message, error)
 	GetById(messageId int) (message.Message, error)
 	Delete(messageId int) error
 }
 
 type PaymentsTB interface {
-	Create(messageId int, pay message.Payments) (int, error)
-	GetById(messageId int) (message.Payments, error)
-	Delete(messageId int) error
+	Create(pay message.Payments) (int, error)
 }
 
 type DeliveriesTB interface {
-	Create(messageId int, delivery message.Deliveries) (int, error)
-	GetById(messageId int) (message.Deliveries, error)
-	Delete(messageId int) error
+	Create(delivery message.Deliveries) (int, error)
 }
 type ItemsTB interface {
-	Create(messageId int, item message.Item) (int, error)
-	GetAll(messageId int) ([]message.Item, error)
+	Create(item message.Item) (int, error)
+	GetAll(messageId, itemsId int) ([]message.Item, error)
 	GetById(messageId, itemId int) (message.Item, error)
-	Delete(messageId, itemId int) error
 }
 
 type Repository struct {
