@@ -21,11 +21,10 @@ func (r *ItemsPostgres) Create(messageId int, item message.Item) (int, error) {
 	}
 
 	var id int
-	createListQuery := fmt.Sprintf("INSERT INTO %s VALUES (default, $1, $2, $3, $4, $5, $6, $7, $8, $10, $11, $12, $13, $14) RETURNING id", Items)
-	row := tx.QueryRow(createListQuery, message.OrderUid, message.TrackNumber, message.Entry,
-		message.Delivery, message.Payment, message.Items, message.Locale,
-		message.InternalSignature, message.CustomerId, message.DeliveryService,
-		message.Shardkey, message.SmId, message.DateCreated, message.OofShard)
+	createListQuery := fmt.Sprintf("INSERT INTO %s VALUES (default, $1, $2, $3, $4, $5, $6, $7, $8, $10, $11) RETURNING id", Items)
+	row := tx.QueryRow(createListQuery, item.ChrtId, item.TrackNumber, item.Price,
+		item.Rid, item.Name, item.Sale, item.Size, item.TotalPrice,
+		item.NmId, item.Brand, item.Status)
 	if err := row.Scan(&id); err != nil {
 		tx.Rollback()
 		return 0, err

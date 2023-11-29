@@ -21,6 +21,3 @@ func (s ItemsService) GetAll(messageId int) ([]message.Item, error) {
 func (s ItemsService) GetById(messageId, itemId int) (message.Item, error) {
 	return s.repo.GetById(messageId, itemId)
 }
-func (s ItemsService) Delete(messageId, itemId int) error {
-	return s.repo.Delete(messageId, itemId)
-}

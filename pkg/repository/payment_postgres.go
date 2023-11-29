@@ -29,21 +29,3 @@ func (r *PaymentsPostgres) Create(pay message.Payments) (int, error) {
 	}
 	return id, tx.Commit()
 }
-
-func (r *PaymentsPostgres) GetById(messageId int) (message.Payments, error) {
-	var delivery message.Message
-
-	query := fmt.Sprintf(`SELECT * FROM %s tl INNER JOIN %s ul on tl.id = ul.list_id WHERE ul.user_id = $1 AND ul.list_id = $2`,
-		todoListsTable, usersListsTable)
-	err := r.db.Get(&list, query, userId, listId)
-
-	return delivery, err
-}
-
-func (r *PaymentsPostgres) Delete(messageId int) error {
-	query := fmt.Sprintf("DELETE FROM %s tl USING %s ul WHERE tl.id = ul.list_id AND ul.user_id=$1 AND ul.list_id=$2",
-		todoListsTable, usersListsTable)
-	_, err := r.db.Exec(query, userId, listId)
-
-	return err
-}
