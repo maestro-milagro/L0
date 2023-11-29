@@ -27,7 +27,6 @@ func (r *PaymentsPostgres) Create(pay message.Payments) (int, error) {
 		tx.Rollback()
 		return 0, err
 	}
-
 	return id, tx.Commit()
 }
 
