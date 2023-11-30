@@ -14,7 +14,7 @@ func NewDeliveriesPostgres(db *sqlx.DB) *DeliveriesPostgres {
 	return &DeliveriesPostgres{db: db}
 }
 
-func (r *DeliveriesPostgres) Create(messageId int, delivery message.Deliveries) (int, error) {
+func (r *DeliveriesPostgres) Create(delivery message.Deliveries) (int, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return 0, err

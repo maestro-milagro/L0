@@ -12,12 +12,6 @@ type ItemsService struct {
 func NewItemsService(repo repository.ItemsTB) *ItemsService {
 	return &ItemsService{repo: repo}
 }
-func (s ItemsService) Create(messageId int, item message.Item) (int, error) {
-	return s.repo.Create(messageId, item)
-}
-func (s ItemsService) GetAll(messageId int) ([]message.Item, error) {
-	return s.repo.GetAll(messageId)
-}
-func (s ItemsService) GetById(messageId, itemId int) (message.Item, error) {
-	return s.repo.GetById(messageId, itemId)
+func (s ItemsService) Create(item []message.Item) ([]int, error) {
+	return s.repo.Create(item)
 }

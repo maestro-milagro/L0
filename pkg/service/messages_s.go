@@ -6,14 +6,34 @@ import (
 )
 
 type MessageService struct {
-	repo repository.MessagesTB
+	repo  repository.MessagesTB
+	repoD repository.DeliveriesTB
+	repoP repository.PaymentsTB
+	repoI repository.ItemsTB
 }
 
-func NewMessageService(repo repository.MessagesTB) *MessageService {
-	return &MessageService{repo: repo}
+func NewMessageService(repo repository.MessagesTB, repoD repository.DeliveriesTB, repoP repository.PaymentsTB, repoI repository.ItemsTB) *MessageService {
+	return &MessageService{
+		repo:  repo,
+		repoD: repoD,
+		repoP: repoP,
+		repoI: repoI,
+	}
 }
 func (s *MessageService) Create(message message.Message) (int, error) {
-	return s.repo.Create(message)
+	delId, err := s.repoD.Create(message.Delivery)
+	if err != nil {
+		return 0, err
+	}
+	payId, err := s.repoP.Create(message.Payment)
+	if err != nil {
+		return 0, err
+	}
+	itemsId, err := s.repoI.Create(message.Items)
+	if err != nil {
+		return 0, err
+	}
+	return s.repo.Create(message, delId, payId, itemsId)
 }
 func (s *MessageService) GetAll() ([]message.Message, error) {
 	return s.repo.GetAll()

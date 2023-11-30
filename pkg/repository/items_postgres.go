@@ -14,7 +14,7 @@ func NewItemsPostgres(db *sqlx.DB) *ItemsPostgres {
 	return &ItemsPostgres{db: db}
 }
 
-func (r *ItemsPostgres) Create(messageId int, item []message.Item) ([]int, error) {
+func (r *ItemsPostgres) Create(item []message.Item) ([]int, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return []int{}, err
@@ -38,31 +38,23 @@ func (r *ItemsPostgres) Create(messageId int, item []message.Item) ([]int, error
 	return ids, tx.Commit()
 }
 
-func (r *ItemsPostgres) GetAll(messageId int) ([]message.Item, error) {
-	var lists []message.Message
-
-	query := fmt.Sprintf("SELECT * FROM %s tl INNER JOIN %s ul on tl.id = ul.list_id WHERE ul.user_id = $1",
-		todoListsTable, usersListsTable)
-	err := r.db.Select(&lists, query, userId)
-
-	return lists, err
-}
-
-func (r *ItemsPostgres) GetById(messageId, itemId int) (message.Item, error) {
-	var message1 message.Message
-
-	query := fmt.Sprintf(`SELECT tl.id, tl.title, tl.description FROM %s tl
-								INNER JOIN %s ul on tl.id = ul.list_id WHERE ul.user_id = $1 AND ul.list_id = $2`,
-		todoListsTable, usersListsTable)
-	err := r.db.Get(&list, query, userId, listId)
-
-	return message1, err
-}
-
-func (r *ItemsPostgres) Delete(messageId, itemId int) error {
-	query := fmt.Sprintf("DELETE FROM %s tl USING %s ul WHERE tl.id = ul.list_id AND ul.user_id=$1 AND ul.list_id=$2",
-		todoListsTable, usersListsTable)
-	_, err := r.db.Exec(query, userId, listId)
-
-	return err
-}
+//func (r *ItemsPostgres) GetAll(messageId int) ([]message.Item, error) {
+//	var lists []message.Message
+//
+//	query := fmt.Sprintf("SELECT * FROM %s tl INNER JOIN %s ul on tl.id = ul.list_id WHERE ul.user_id = $1",
+//		todoListsTable, usersListsTable)
+//	err := r.db.Select(&lists, query, userId)
+//
+//	return lists, err
+//}
+//
+//func (r *ItemsPostgres) GetById(messageId, itemId int) (message.Item, error) {
+//	var message1 message.Message
+//
+//	query := fmt.Sprintf(`SELECT tl.id, tl.title, tl.description FROM %s tl
+//								INNER JOIN %s ul on tl.id = ul.list_id WHERE ul.user_id = $1 AND ul.list_id = $2`,
+//		todoListsTable, usersListsTable)
+//	err := r.db.Get(&list, query, userId, listId)
+//
+//	return message1, err
+//}

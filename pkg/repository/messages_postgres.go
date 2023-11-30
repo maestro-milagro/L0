@@ -14,7 +14,7 @@ func NewMessagesPostgres(db *sqlx.DB) *MessagesPostgres {
 	return &MessagesPostgres{db: db}
 }
 
-func (r *MessagesPostgres) Create(message message.Message, delId, payId, itemsId int) (int, error) {
+func (r *MessagesPostgres) Create(message message.Message, delId, payId int, itemsId []int) (int, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return 0, err
@@ -41,11 +41,13 @@ func (r *MessagesPostgres) Create(message message.Message, delId, payId, itemsId
 		tx.Rollback()
 		return 0, err
 	}
-	createMessagesItemsQuery := fmt.Sprintf("INSERT INTO %s VALUES (default, $1, $2)", MessagesItems)
-	_, err = tx.Exec(createMessagesItemsQuery, id, itemsId)
-	if err != nil {
-		tx.Rollback()
-		return 0, err
+	for _, v := range itemsId {
+		createMessagesItemsQuery := fmt.Sprintf("INSERT INTO %s VALUES (default, $1, $2)", MessagesItems)
+		_, err = tx.Exec(createMessagesItemsQuery, id, v)
+		if err != nil {
+			tx.Rollback()
+			return 0, err
+		}
 	}
 
 	return id, tx.Commit()
