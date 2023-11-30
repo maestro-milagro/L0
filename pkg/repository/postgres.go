@@ -7,9 +7,9 @@ import (
 
 const (
 	Messages           = "massages"
-	Deliveries         = "deliveries"
-	Payments           = "payments"
-	Items              = "items"
+	Deliveries         = "delivery"
+	Payments           = "payment"
+	Items              = "item"
 	MessagesDeliveries = "messages_deliveries"
 	MessagesPayments   = "messages_payments"
 	MessagesItems      = "messages_items"
