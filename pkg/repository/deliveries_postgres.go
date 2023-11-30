@@ -31,3 +31,15 @@ func (r *DeliveriesPostgres) Create(delivery message.Deliveries) (int, error) {
 
 	return id, tx.Commit()
 }
+func (r *DeliveriesPostgres) GetAll() ([]message.Deliveries, error) {
+	var del []message.Deliveries
+	queryDel := fmt.Sprintf("SELECT d.deliveryid, d.name, d.phone, d.zip, d.city, d.address, d.region, d.email FROM %s m INNER JOIN %s md on m.MessageId = md.MessageId INNER JOIN %s d on d.DeliveryId = md.DeliveryId", Messages, MessagesDeliveries, Deliveries)
+	err := r.db.Select(&del, queryDel)
+	return del, err
+}
+func (r *DeliveriesPostgres) GetById(messageId int) (message.Deliveries, error) {
+	var del message.Deliveries
+	queryDel := fmt.Sprintf("SELECT d.deliveryid, d.name, d.phone, d.zip, d.city, d.address, d.region, d.email FROM %s m INNER JOIN %s md on m.MessageId = md.MessageId INNER JOIN %s d on d.DeliveryId = md.DeliveryId WHERE m.MessageId = $1", Messages, MessagesDeliveries, Deliveries)
+	err := r.db.Get(&del, queryDel, messageId)
+	return del, err
+}

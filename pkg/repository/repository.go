@@ -14,15 +14,19 @@ type MessagesTB interface {
 
 type PaymentsTB interface {
 	Create(pay message.Payments) (int, error)
+	GetById(messageId int) (message.Payments, error)
+	GetAll() ([]message.Payments, error)
 }
 
 type DeliveriesTB interface {
 	Create(delivery message.Deliveries) (int, error)
+	GetById(messageId int) (message.Deliveries, error)
+	GetAll() ([]message.Deliveries, error)
 }
 type ItemsTB interface {
 	Create(item []message.Item) ([]int, error)
-	//GetAll(messageId, itemsId int) ([]message.Item, error)
-	//GetById(messageId, itemId int) (message.Item, error)
+	GetById(messageId int) ([]message.Item, error)
+	GetAll() ([]message.Item, error)
 }
 
 type Repository struct {

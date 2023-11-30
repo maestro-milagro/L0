@@ -29,3 +29,15 @@ func (r *PaymentsPostgres) Create(pay message.Payments) (int, error) {
 	}
 	return id, tx.Commit()
 }
+func (r *PaymentsPostgres) GetAll() ([]message.Payments, error) {
+	var pay []message.Payments
+	query := fmt.Sprintf("SELECT d.paymentid, d.transaction, d.requestId, d.currency, d.provider, d.amount, d.paymentDt, d.bank, d.deliveryCost, d.goodsTotal, d.customFee FROM %s m INNER JOIN %s md on m.MessageId = md.MessageId INNER JOIN %s d on d.PaymentId = md.PaymentId", Messages, MessagesPayments, Payments)
+	err := r.db.Select(&pay, query)
+	return pay, err
+}
+func (r *PaymentsPostgres) GetById(messageId int) (message.Payments, error) {
+	var pay message.Payments
+	queryDel := fmt.Sprintf("SELECT d.paymentid, d.transaction, d.requestId, d.currency, d.provider, d.amount, d.paymentDt, d.bank, d.deliveryCost, d.goodsTotal, d.customFee FROM %s m INNER JOIN %s md on m.MessageId = md.MessageId INNER JOIN %s d on d.PaymentId = md.PaymentId WHERE m.MessageId = $1", Messages, MessagesPayments, Payments)
+	err := r.db.Get(&pay, queryDel, messageId)
+	return pay, err
+}

@@ -56,11 +56,7 @@ func (r *MessagesPostgres) Create(message message.Message, delId, payId int, ite
 func (r *MessagesPostgres) GetAll() ([]message.Message, error) {
 	var lists []message.Message
 
-	query := fmt.Sprintf("SELECT * FROM %s m INNER JOIN %s md on m.MessageId = md.MessageId INNER JOIN %s d on d.DeliveryId = md.DeliveryId "+
-		"INNER JOIN %s mp on m.MessageId = mp.MessageId INNER JOIN %s p on p.PaymentId = mp.PaymentId "+
-		"INNER JOIN %s mi on m.MessageId = mi.MessageId INNER JOIN %s i on i.ItemId = mi.ItemId",
-		Messages, MessagesDeliveries, Deliveries,
-		MessagesPayments, Payments, MessagesItems, Items)
+	query := fmt.Sprintf("SELECT * FROM %s", Messages)
 	err := r.db.Select(&lists, query)
 
 	return lists, err
@@ -68,17 +64,8 @@ func (r *MessagesPostgres) GetAll() ([]message.Message, error) {
 
 func (r *MessagesPostgres) GetById(messageId int) (message.Message, error) {
 	var message1 message.Message
-	var del message.Deliveries
-	//var pay message.Payments
-	//var items message.Item
-
-	//query := fmt.Sprintf("SELECT * FROM %s m INNER JOIN %s md on m.MessageId = md.MessageId INNER JOIN %s d on d.DeliveryId = md.DeliveryId INNER JOIN %s mp on m.MessageId = mp.MessageId INNER JOIN %s p on p.PaymentId = mp.PaymentId INNER JOIN %s mi on m.MessageId = mi.MessageId INNER JOIN %s i on i.ItemId = mi.ItemId WHERE m.MessageId = $1",
-	//	Messages, MessagesDeliveries, Deliveries,
-	//	MessagesPayments, Payments, MessagesItems, Items)
-	//err := r.db.Get(&message1, query, messageId)
-	queryDel := fmt.Sprintf("SELECT d.deliveryid, d.name, d.phone, d.zip, d.city, d.address, d.region, d.email FROM %s m INNER JOIN %s md on m.MessageId = md.MessageId INNER JOIN %s d on d.DeliveryId = md.DeliveryId WHERE m.MessageId = $1", Messages, MessagesDeliveries, Deliveries)
-	err := r.db.Get(&del, queryDel, messageId)
-	message1.Delivery = del
+	query := fmt.Sprintf("SELECT * FROM %s WHERE MessageId = $1", Messages)
+	err := r.db.Get(&message1, query, messageId)
 	return message1, err
 }
 

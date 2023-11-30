@@ -34,27 +34,18 @@ func (r *ItemsPostgres) Create(item []message.Item) ([]int, error) {
 		ids[i] = id
 
 	}
-
 	return ids, tx.Commit()
 }
 
-//func (r *ItemsPostgres) GetAll(messageId int) ([]message.Item, error) {
-//	var lists []message.Message
-//
-//	query := fmt.Sprintf("SELECT * FROM %s tl INNER JOIN %s ul on tl.id = ul.list_id WHERE ul.user_id = $1",
-//		todoListsTable, usersListsTable)
-//	err := r.db.Select(&lists, query, userId)
-//
-//	return lists, err
-//}
-//
-//func (r *ItemsPostgres) GetById(messageId, itemId int) (message.Item, error) {
-//	var message1 message.Message
-//
-//	query := fmt.Sprintf(`SELECT tl.id, tl.title, tl.description FROM %s tl
-//								INNER JOIN %s ul on tl.id = ul.list_id WHERE ul.user_id = $1 AND ul.list_id = $2`,
-//		todoListsTable, usersListsTable)
-//	err := r.db.Get(&list, query, userId, listId)
-//
-//	return message1, err
-//}
+func (r *ItemsPostgres) GetAll() ([]message.Item, error) {
+	var it []message.Item
+	query := fmt.Sprintf("SELECT d.itemid, d.chrtId, d.trackNumber, d.price, d.rid, d.name, d.sale, d.size, d.totalPrice, d.nmid, d.nrand, d.status FROM %s m INNER JOIN %s md on m.MessageId = md.MessageId INNER JOIN %s d on d.ItemId = md.ItemId", Messages, MessagesItems, Items)
+	err := r.db.Select(&it, query)
+	return it, err
+}
+func (r *ItemsPostgres) GetById(messageId int) ([]message.Item, error) {
+	var it []message.Item
+	query := fmt.Sprintf("SELECT d.itemid, d.chrtId, d.trackNumber, d.price, d.rid, d.name, d.sale, d.size, d.totalPrice, d.nmid, d.brand, d.status FROM %s m INNER JOIN %s md on m.MessageId = md.MessageId INNER JOIN %s d on d.ItemId = md.ItemId WHERE m.MessageId = $1", Messages, MessagesItems, Items)
+	err := r.db.Select(&it, query, messageId)
+	return it, err
+}
