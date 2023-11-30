@@ -14,23 +14,28 @@ func NewItemsPostgres(db *sqlx.DB) *ItemsPostgres {
 	return &ItemsPostgres{db: db}
 }
 
-func (r *ItemsPostgres) Create(messageId int, item message.Item) (int, error) {
+func (r *ItemsPostgres) Create(messageId int, item []message.Item) ([]int, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
-		return 0, err
+		return []int{}, err
 	}
 
+	ids := make([]int, len(item))
 	var id int
-	createListQuery := fmt.Sprintf("INSERT INTO %s VALUES (default, $1, $2, $3, $4, $5, $6, $7, $8, $10, $11) RETURNING id", Items)
-	row := tx.QueryRow(createListQuery, item.ChrtId, item.TrackNumber, item.Price,
-		item.Rid, item.Name, item.Sale, item.Size, item.TotalPrice,
-		item.NmId, item.Brand, item.Status)
-	if err := row.Scan(&id); err != nil {
-		tx.Rollback()
-		return 0, err
+	for i, v := range item {
+		createListQuery := fmt.Sprintf("INSERT INTO %s VALUES (default, $1, $2, $3, $4, $5, $6, $7, $8, $10, $11) RETURNING id", Items)
+		row := tx.QueryRow(createListQuery, v.ChrtId, v.TrackNumber, v.Price,
+			v.Rid, v.Name, v.Sale, v.Size, v.TotalPrice,
+			v.NmId, v.Brand, v.Status)
+		if err := row.Scan(&id); err != nil {
+			tx.Rollback()
+			return []int{}, err
+		}
+		ids[i] = id
+
 	}
 
-	return id, tx.Commit()
+	return ids, tx.Commit()
 }
 
 func (r *ItemsPostgres) GetAll(messageId int) ([]message.Item, error) {
