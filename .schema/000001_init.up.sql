@@ -38,7 +38,7 @@ CREATE TABLE payment
     Bank         varchar(255),
     DeliveryCost int,
     GoodsTotal   int,
-    CustomFee    int,
+    CustomFee    int
 );
 
 CREATE TABLE item
@@ -54,7 +54,7 @@ CREATE TABLE item
     TotalPrice  int,
     NmId        int,
     Brand       varchar(255),
-    Status      int,
+    Status      int
 );
 
 CREATE TABLE MessageDeliveries

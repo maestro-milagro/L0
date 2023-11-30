@@ -6,13 +6,13 @@ import (
 )
 
 const (
-	Messages           = "massages"
+	Messages           = "message"
 	Deliveries         = "delivery"
 	Payments           = "payment"
 	Items              = "item"
-	MessagesDeliveries = "messages_deliveries"
-	MessagesPayments   = "messages_payments"
-	MessagesItems      = "messages_items"
+	MessagesDeliveries = "messagedeliveries"
+	MessagesPayments   = "messagepayments"
+	MessagesItems      = "messageitem"
 )
 
 type Config struct {

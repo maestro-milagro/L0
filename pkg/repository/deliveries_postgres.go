@@ -21,7 +21,7 @@ func (r *DeliveriesPostgres) Create(delivery message.Deliveries) (int, error) {
 	}
 
 	var id int
-	createListQuery := fmt.Sprintf("INSERT INTO %s VALUES (default, $1, $2, $3, $4, $5, $6, $7) RETURNING id", Deliveries)
+	createListQuery := fmt.Sprintf("INSERT INTO %s VALUES (default, $1, $2, $3, $4, $5, $6, $7) RETURNING DeliveryId", Deliveries)
 	row := tx.QueryRow(createListQuery, delivery.Name, delivery.Phone, delivery.Zip,
 		delivery.City, delivery.Address, delivery.Region, delivery.Email)
 	if err := row.Scan(&id); err != nil {

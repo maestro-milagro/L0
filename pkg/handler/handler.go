@@ -18,13 +18,13 @@ func NewHandler(services *service.Service) *Handler {
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
-
+	router.LoadHTMLGlob("templates/*")
 	messages := router.Group("/message")
 	{
 		messages.POST("/", h.createMessage)
 		messages.GET("/", h.getAllMessages)
-		messages.GET("/:id", h.getMessageById)
-		messages.DELETE("/:id", h.deleteMessage)
+		messages.GET("/:MessageId", h.getMessageById)
+		messages.DELETE("/:MessageId", h.deleteMessage)
 
 	}
 
@@ -49,7 +49,7 @@ func (h *Handler) createMessage(c *gin.Context) {
 }
 
 type getAllListsResponse struct {
-	Messages []message.Message `json:",messages"`
+	Messages []message.Message `json:"messages"`
 }
 
 func (h *Handler) getAllMessages(c *gin.Context) {
@@ -64,7 +64,7 @@ func (h *Handler) getAllMessages(c *gin.Context) {
 	})
 }
 func (h *Handler) getMessageById(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := strconv.Atoi(c.Param("MessageId"))
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
 		return
@@ -75,11 +75,13 @@ func (h *Handler) getMessageById(c *gin.Context) {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	c.JSON(http.StatusOK, message1)
+	c.HTML(http.StatusOK, "index.html", gin.H{
+		"message": message1,
+	})
+	//	c.JSON(http.StatusOK, message1)
 }
 func (h *Handler) deleteMessage(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := strconv.Atoi(c.Param("MessageId"))
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
 		return

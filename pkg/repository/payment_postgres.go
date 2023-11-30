@@ -21,7 +21,7 @@ func (r *PaymentsPostgres) Create(pay message.Payments) (int, error) {
 	}
 
 	var id int
-	createListQuery := fmt.Sprintf("INSERT INTO %s VALUES (default, $1, $2, $3, $4, $5, $6, $7, $8, $10) RETURNING id", Payments)
+	createListQuery := fmt.Sprintf("INSERT INTO %s VALUES (default, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING PaymentId", Payments)
 	row := tx.QueryRow(createListQuery, pay.Transaction, pay.RequestId, pay.Currency, pay.Provider, pay.Amount, pay.PaymentDt, pay.Bank, pay.DeliveryCost, pay.GoodsTotal, pay.CustomFee)
 	if err := row.Scan(&id); err != nil {
 		tx.Rollback()

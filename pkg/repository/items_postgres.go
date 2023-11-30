@@ -23,7 +23,7 @@ func (r *ItemsPostgres) Create(item []message.Item) ([]int, error) {
 	ids := make([]int, len(item))
 	var id int
 	for i, v := range item {
-		createListQuery := fmt.Sprintf("INSERT INTO %s VALUES (default, $1, $2, $3, $4, $5, $6, $7, $8, $10, $11) RETURNING id", Items)
+		createListQuery := fmt.Sprintf("INSERT INTO %s VALUES (default, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING ItemId", Items)
 		row := tx.QueryRow(createListQuery, v.ChrtId, v.TrackNumber, v.Price,
 			v.Rid, v.Name, v.Sale, v.Size, v.TotalPrice,
 			v.NmId, v.Brand, v.Status)
