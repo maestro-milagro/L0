@@ -6,11 +6,15 @@ import (
 	"awesomeProject/pkg/repository"
 	"awesomeProject/pkg/service"
 	"context"
+	"encoding/json"
+	"fmt"
 	_ "github.com/lib/pq"
+	"github.com/nats-io/stan.go"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 )
 
@@ -47,7 +51,6 @@ func main() {
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
-
 	srv := new(message.Server)
 	go func() {
 		if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
@@ -55,13 +58,25 @@ func main() {
 		}
 	}()
 
-	logrus.Print("TodoApp Started")
+	logrus.Print("MessageApp Started")
 
+	sc, _ := stan.Connect("mess", "sub")
+
+	sc.Subscribe("message", func(m *stan.Msg) {
+		var response message.Message
+		err = json.Unmarshal(m.Data, &response)
+		if err != nil {
+			fmt.Printf("error occured while subing: %s", err.Error())
+		}
+		fmt.Println(services.MessagesS.Create(response))
+	})
+	Block()
+	sc.Close()
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 	<-quit
 
-	logrus.Print("TodoApp Shutting Down")
+	logrus.Print("MessageApp Shutting Down")
 
 	if err := srv.Shutdown(context.Background()); err != nil {
 		logrus.Errorf("error occured on server shutting down: %s", err.Error())
@@ -76,4 +91,9 @@ func initConfig() error {
 	viper.AddConfigPath("configs")
 	viper.SetConfigName("config")
 	return viper.ReadInConfig()
+}
+func Block() {
+	w := sync.WaitGroup{}
+	w.Add(1)
+	w.Wait()
 }
