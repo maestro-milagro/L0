@@ -4,7 +4,6 @@ import (
 	message "awesomeProject"
 	"awesomeProject/pkg/cache"
 	"awesomeProject/pkg/repository"
-	"fmt"
 )
 
 type MessageService struct {
@@ -63,7 +62,6 @@ func (s *MessageService) GetById(messageId int) (message.Message, error) {
 	c := cache.C
 	posAnsw, ok := c.Read(messageId)
 	if ok {
-		fmt.Println("yes")
 		return posAnsw, nil
 	}
 	del, err := s.repoD.GetById(messageId)
@@ -85,7 +83,6 @@ func (s *MessageService) GetById(messageId int) (message.Message, error) {
 	mess.Payment = pay
 	mess.Delivery = del
 	mess.Items = it
-	fmt.Println("No")
 	c.Update(messageId, mess)
 	return mess, err
 }
