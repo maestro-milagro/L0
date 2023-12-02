@@ -2,6 +2,7 @@ package main
 
 import (
 	message "awesomeProject"
+	"awesomeProject/pkg/cache"
 	"awesomeProject/pkg/handler"
 	"awesomeProject/pkg/repository"
 	"awesomeProject/pkg/service"
@@ -57,9 +58,16 @@ func main() {
 			logrus.Fatalf("error occured while running http server: %s", err.Error())
 		}
 	}()
-
 	logrus.Print("MessageApp Started")
-
+	list, err := services.MessagesS.GetAll()
+	c := cache.C
+	for _, v := range list {
+		_, ok := c.Read(v.MessageId)
+		if ok {
+			continue
+		}
+		c.Update(v.MessageId, v)
+	}
 	sc, _ := stan.Connect("mess", "sub")
 
 	sc.Subscribe("message", func(m *stan.Msg) {
@@ -70,6 +78,9 @@ func main() {
 		}
 		fmt.Println(services.MessagesS.Create(response))
 	})
+	if err != nil {
+		return
+	}
 	Block()
 	sc.Close()
 	quit := make(chan os.Signal, 1)
