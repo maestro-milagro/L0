@@ -15,6 +15,7 @@ import (
 	"github.com/spf13/viper"
 	"os"
 	"os/signal"
+	"reflect"
 	"sync"
 	"syscall"
 )
@@ -76,7 +77,11 @@ func main() {
 		if err != nil {
 			fmt.Printf("error occured while subing: %s", err.Error())
 		}
-		fmt.Println(services.MessagesS.Create(response))
+		if reflect.DeepEqual(response, message.Message{}) {
+			fmt.Println("invalid message")
+		} else {
+			fmt.Println(services.MessagesS.Create(response))
+		}
 	})
 	if err != nil {
 		return

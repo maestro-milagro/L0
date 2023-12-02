@@ -5,6 +5,7 @@ import (
 	"awesomeProject/pkg/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"reflect"
 	"strconv"
 	"time"
 )
@@ -39,7 +40,10 @@ func (h *Handler) createMessage(c *gin.Context) {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-
+	if reflect.DeepEqual(input, message.Message{}) {
+		newErrorResponse(c, http.StatusBadRequest, "Invalid message")
+		return
+	}
 	id, err := h.services.MessagesS.Create(input)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
