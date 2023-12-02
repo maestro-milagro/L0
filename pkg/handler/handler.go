@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type Handler struct {
@@ -115,7 +116,7 @@ func (h *Handler) getMessageById(c *gin.Context) {
 		"delivery_service":   message1.DeliveryService,
 		"shardkey":           message1.Shardkey,
 		"sm_id":              message1.SmId,
-		"date_created":       message1.DateCreated,
+		"date_created":       message1.DateCreated.Format(time.RFC1123),
 		"oof_shard":          message1.OofShard,
 	})
 	//	c.JSON(http.StatusOK, message1)
