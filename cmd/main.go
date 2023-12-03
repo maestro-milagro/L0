@@ -6,34 +6,20 @@ import (
 	"awesomeProject/pkg/handler"
 	"awesomeProject/pkg/repository"
 	"awesomeProject/pkg/service"
-	"context"
 	"encoding/json"
 	"fmt"
 	_ "github.com/lib/pq"
 	"github.com/nats-io/stan.go"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"os"
-	"os/signal"
 	"reflect"
 	"sync"
-	"syscall"
 )
-
-// @title Todo App API
-// @version 1.0
-// @description API Server for TodoList Application
-
-// @host localhost:8000
-// @BasePath /
-
-// @securityDefinitions.apikey ApiKeyAuth
-// @in header
-// @name Authorization
 
 func main() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
-
+	//Инициализируем конфигурационный файл config.yml,
+	//чтобы получить возможность получать из него данные для подключения к бд
 	if err := initConfig(); err != nil {
 		logrus.Fatalf("error initializing configs: %s", err.Error())
 	}
@@ -49,10 +35,14 @@ func main() {
 	if err != nil {
 		logrus.Fatalf("failed to initialize db: %s", err.Error())
 	}
-
+	defer db.Close()
+	//Создаем объект базы данных
 	repos := repository.NewRepository(db)
+	//Создаем объект сервиса
 	services := service.NewService(repos)
+	//Создаем объект хендлера
 	handlers := handler.NewHandler(services)
+	//Запускаем http сервер
 	srv := new(message.Server)
 	go func() {
 		if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
@@ -60,6 +50,8 @@ func main() {
 		}
 	}()
 	logrus.Print("MessageApp Started")
+	//Чтобы избежать потери данных кэша при подении сервиса проверяем их наличие в кэше
+	//В случае отсутствия каких-либо данных восстанавливаем их из бд
 	list, err := services.MessagesS.GetAll()
 	c := cache.C
 	for _, v := range list {
@@ -69,17 +61,22 @@ func main() {
 		}
 		c.Update(v.MessageId, v)
 	}
+	//Подключаемся к каналу nats-streaming
 	sc, _ := stan.Connect("mess", "sub")
-
+	//Подписываемся на канал nats-streaming
 	sc.Subscribe("message", func(m *stan.Msg) {
+		//Декодируем полученный из канала массив байт в объект Message
 		var response message.Message
 		err = json.Unmarshal(m.Data, &response)
 		if err != nil {
 			fmt.Printf("error occured while subing: %s", err.Error())
 		}
+		//Проверяем подходит ли полученный объект под структуру Message
+		//Если мы получили объект в котором ни одно поле не совпадает с нужной нам структурой выводим сообщение об ошибке
 		if reflect.DeepEqual(response, message.Message{}) {
 			fmt.Println("invalid message")
 		} else {
+			//В обратном случае сохраняем объект в бд
 			id, err := services.MessagesS.Create(response)
 			if err != nil {
 				fmt.Printf("message error: %s", err.Error())
@@ -87,25 +84,11 @@ func main() {
 			fmt.Printf("order whith id : %d was created", id)
 			fmt.Println()
 		}
-	})
-	if err != nil {
-		return
-	}
+		//Durable Subscription дает возможность не пропускать сообщения при падении сервиса
+		//и продолжить чтение с последнего прочитанного сообщения
+	}, stan.DurableName("my-durable"))
 	Block()
 	sc.Close()
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
-	<-quit
-
-	logrus.Print("MessageApp Shutting Down")
-
-	if err := srv.Shutdown(context.Background()); err != nil {
-		logrus.Errorf("error occured on server shutting down: %s", err.Error())
-	}
-
-	if err := db.Close(); err != nil {
-		logrus.Errorf("error occured on db connection close: %s", err.Error())
-	}
 }
 
 func initConfig() error {

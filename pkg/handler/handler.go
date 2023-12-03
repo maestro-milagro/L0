@@ -20,6 +20,7 @@ func NewHandler(services *service.Service) *Handler {
 	}
 }
 
+// Объявляем обработчики для каждого эндпоинта используя библиотеку gin
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 	router.LoadHTMLGlob("templates/*")
@@ -31,25 +32,30 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		messages.DELETE("/:MessageId", h.deleteMessage)
 
 	}
-
 	return router
 }
+
+// Обрабработчик запроса на создание объекта
 func (h *Handler) createMessage(c *gin.Context) {
 	var input message.Message
+	//Парсим json в объект Message
 	if err := c.BindJSON(&input); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
+	//Проверяем подходит ли полученный объект под структуру Message
+	//Если мы получили объект в котором ни одно поле не совпадает с нужной нам структурой выводим сообщение об ошибке
 	if reflect.DeepEqual(input, message.Message{}) {
 		newErrorResponse(c, http.StatusBadRequest, "Invalid message")
 		return
 	}
+	//Вызываем у service метод для сохранения объекта в бд
 	id, err := h.services.MessagesS.Create(input)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-
+	//Возвращаем id сохранённого объекта
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"id": id,
 	})
@@ -59,6 +65,7 @@ type getAllListsResponse struct {
 	Messages []message.Message `json:"messages"`
 }
 
+// Обрабработчик для получения всех объектов из бд
 func (h *Handler) getAllMessages(c *gin.Context) {
 	list, err := h.services.MessagesS.GetAll()
 	if err != nil {
@@ -70,18 +77,23 @@ func (h *Handler) getAllMessages(c *gin.Context) {
 		Messages: list,
 	})
 }
+
+// Обрабработчик для получения объекта по id
 func (h *Handler) getMessageById(c *gin.Context) {
+	//Парсим id запрашиваемого объекта
 	id, err := strconv.Atoi(c.Param("MessageId"))
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
 		return
 	}
-
+	//Вызываем у service метод для получения объекта из бд
 	message1, err := h.services.MessagesS.GetById(id)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+	//Передаем значения всех полей, которые мы хотим вывести в ответ на запрос
+	//Так же передаем имя html файла для отображения ответа
 	c.HTML(http.StatusOK, "index.html", gin.H{
 		"order_uid":          message1.OrderUid,
 		"track_number":       message1.TrackNumber,
@@ -123,8 +135,9 @@ func (h *Handler) getMessageById(c *gin.Context) {
 		"date_created":       message1.DateCreated.Format(time.RFC1123),
 		"oof_shard":          message1.OofShard,
 	})
-	//	c.JSON(http.StatusOK, message1)
 }
+
+// Обрабработчик для удаления объекта по id
 func (h *Handler) deleteMessage(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("MessageId"))
 	if err != nil {

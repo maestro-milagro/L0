@@ -6,6 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// Создаем структуру для реализации интерфейса для работы с таблицей message
 type MessagesPostgres struct {
 	db *sqlx.DB
 }
@@ -14,6 +15,7 @@ func NewMessagesPostgres(db *sqlx.DB) *MessagesPostgres {
 	return &MessagesPostgres{db: db}
 }
 
+// Функция для сохранения переданного объекта в бд
 func (r *MessagesPostgres) Create(message message.Message, delId, payId int, itemsId []int) (int, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
@@ -21,6 +23,8 @@ func (r *MessagesPostgres) Create(message message.Message, delId, payId int, ite
 	}
 
 	var id int
+	// Создаем запрос и сохраняем данные переданные нам для таблицы message в саму таблицу,
+	//а так же сохраняем id в таблицы связывающие её с остальными
 	createMessageQuery := fmt.Sprintf("INSERT INTO %s VALUES (default, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING MessageId", Messages)
 	row := tx.QueryRow(createMessageQuery, message.OrderUid, message.TrackNumber, message.Entry, message.Locale,
 		message.InternalSignature, message.CustomerId, message.DeliveryService,
@@ -53,6 +57,7 @@ func (r *MessagesPostgres) Create(message message.Message, delId, payId int, ite
 	return id, tx.Commit()
 }
 
+// Функция для получения всех объектов из бд
 func (r *MessagesPostgres) GetAll() ([]message.Message, error) {
 	var lists []message.Message
 
@@ -62,6 +67,7 @@ func (r *MessagesPostgres) GetAll() ([]message.Message, error) {
 	return lists, err
 }
 
+// Функция для получения объекта по id
 func (r *MessagesPostgres) GetById(messageId int) (message.Message, error) {
 	var message1 message.Message
 	query := fmt.Sprintf("SELECT * FROM %s WHERE MessageId = $1", Messages)
@@ -69,6 +75,7 @@ func (r *MessagesPostgres) GetById(messageId int) (message.Message, error) {
 	return message1, err
 }
 
+// Функция для удаления объекта по id
 func (r *MessagesPostgres) Delete(messageId int) error {
 	query := fmt.Sprintf("DELETE FROM %s md USING %s d WHERE md.MessageId = d.MessageId AND d.MessageId=$1",
 		MessagesDeliveries, Deliveries)

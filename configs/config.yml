@@ -7,6 +7,3 @@ db:
   port: "5433"
   dbname: "postgres"
   sslmode: "disable"
-stan:
-  clusterID: "L674t5qFKHMz5o697wksVW"
-  clientID: "NC6UW5IDMYTCDG7LH2NQ7GDNM63723F4DKAEP4LJX36YUG2XN7VYLHW4"
