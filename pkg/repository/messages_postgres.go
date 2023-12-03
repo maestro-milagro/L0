@@ -24,7 +24,7 @@ func (r *MessagesPostgres) Create(message message.Message, delId, payId int, ite
 	createMessageQuery := fmt.Sprintf("INSERT INTO %s VALUES (default, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING MessageId", Messages)
 	row := tx.QueryRow(createMessageQuery, message.OrderUid, message.TrackNumber, message.Entry, message.Locale,
 		message.InternalSignature, message.CustomerId, message.DeliveryService,
-		message.Shardkey, message.SmId, message.DateCreated, message.OofShard)
+		message.Shardkey, message.SmId, message.OofShard, message.DateCreated)
 	if err := row.Scan(&id); err != nil {
 		tx.Rollback()
 		return 0, err

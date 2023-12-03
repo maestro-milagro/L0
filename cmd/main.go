@@ -80,7 +80,12 @@ func main() {
 		if reflect.DeepEqual(response, message.Message{}) {
 			fmt.Println("invalid message")
 		} else {
-			fmt.Println(services.MessagesS.Create(response))
+			id, err := services.MessagesS.Create(response)
+			if err != nil {
+				fmt.Printf("message error: %s", err.Error())
+			}
+			fmt.Printf("order whith id : %d was created", id)
+			fmt.Println()
 		}
 	})
 	if err != nil {
