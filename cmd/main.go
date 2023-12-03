@@ -87,10 +87,7 @@ func main() {
 			fmt.Printf("order whith id : %d was created", id)
 			fmt.Println()
 		}
-	})
-	if err != nil {
-		return
-	}
+	}, stan.DurableName("my-durable"))
 	Block()
 	sc.Close()
 	quit := make(chan os.Signal, 1)
